@@ -25,6 +25,7 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/hex"
 	"math/big"
 	"reflect"
@@ -1096,5 +1097,24 @@ func TestJWKPaddingY(t *testing.T) {
 	}
 	if jwk.Valid() {
 		t.Errorf("Expected key to be invalid, but it was valid.")
+	}
+}
+
+func TestUnMarshalShortKey(t *testing.T) {
+	key := `{
+	"kty" : "EC",
+	"use" : "sig",
+	"crv" : "P-521",
+	"kid" : "f15b60c3-9626-43fa-be74-cdc014fd484e_sig_es512",
+	"x5c" : [ "MIICADCCAWGgAwIBAgIhAJdhoxQe/u1BtesMVSgnO+o8z3+OqPHWsnvBLTVUsyphMAoGCCqGSM49BAMEMCExHzAdBgNVBAMMFm94QXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwNjA5MTUwMTUyWhcNMjEwNjExMTUwMjAwWjAhMR8wHQYDVQQDDBZveEF1dGggQ0EgQ2VydGlmaWNhdGVzMIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBhqbSBYhfo1VyJ2/c8ewGiUo0GpQ8+2ZeORIYUC+rRF/VLSpypV6cz5Mkehl3QSA8nZ5PRaN3v5zh0Vrq5lHauaAA54cZGgUDN8h9aUsrSazE93EUPvazW0H8+U0WAmN6ka3QVQaBhPxKLBYEuNa0W72f30rOHjzwqIp0mVjwkvurPsCjJzAlMCMGA1UdJQQcMBoGCCsGAQUFBwMBBggrBgEFBQcDAgYEVR0lADAKBggqhkjOPQQDBAOBjAAwgYgCQgGwxPjDTB9pnAkO1vgfrSeM/Y0dyXJYLnuSP6JqrwxXP6jhkyxP7/1CT9tY07lEUheTWQz8NS+VOp28WmZEJ8uuEAJCAIq3UZvPobENsAntZ6RnAybiT6alF71JDQkEF73mjOGRGXyMkToy1Cxc/35uKYqOoWO2d98KxRchTgY19vsLKZaJ" ],
+	"x" : "AYam0gWIX6NVcidv3PHsBolKNBqUPPtmXjkSGFAvq0Rf1S0qcqVenM-TJHoZd0EgPJ2eT0Wjd7-c4dFa6uZR2rmg",
+	"y" : "54cZGgUDN8h9aUsrSazE93EUPvazW0H8-U0WAmN6ka3QVQaBhPxKLBYEuNa0W72f30rOHjzwqIp0mVjwkvurPsA",
+	"exp" : 1623423720571,
+	"alg" : "ES512"
+	}`
+	var jwk JSONWebKey
+	err := jwk.UnmarshalJSON([]byte(key))
+	if err == nil {
+		t.Errorf("Expected key with short y to fail unmarshalling")
 	}
 }

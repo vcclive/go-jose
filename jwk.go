@@ -505,15 +505,21 @@ func (key rawJSONWebKey) ecPublicKey() (*ecdsa.PublicKey, error) {
 		return nil, errors.New("square/go-jose: invalid EC key, missing x/y values")
 	}
 
+	size := curveSize(curve)
 	// The length of this octet string MUST be the full size of a coordinate for
 	// the curve specified in the "crv" parameter.
 	// https://tools.ietf.org/html/rfc7518#section-6.2.1.2
-	if curveSize(curve) != len(key.X.data) {
+	xLen := len(key.X.data)
+	if size < xLen {
 		return nil, fmt.Errorf("square/go-jose: invalid EC public key, wrong length for x")
+	} else if size > xLen {
+		key.X = newFixedSizeBuffer(key.X.data, size)
 	}
-
-	if curveSize(curve) != len(key.Y.data) {
+	yLen := len(key.Y.data)
+	if size < yLen {
 		return nil, fmt.Errorf("square/go-jose: invalid EC public key, wrong length for y")
+	} else if size > yLen {
+		key.Y = newFixedSizeBuffer(key.Y.data, size)
 	}
 
 	x := key.X.bigInt()
